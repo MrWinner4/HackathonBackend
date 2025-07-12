@@ -10,7 +10,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
 
@@ -24,22 +24,22 @@ class User(Base):
 class PiggyBank(Base):
     __tablename__ = 'piggy_banks'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     balance = Column(Float, default=0.0, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
+    user_id = Column(String, ForeignKey('users.id'), unique=True, nullable=False)
 
     user = relationship('User', back_populates='piggy_bank')
 
 class Goal(Base):
     __tablename__ = 'goals'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     name = Column(String, nullable=False)
     target_amount = Column(Float, nullable=False)
     due_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
     user = relationship('User', back_populates='goals')
 
 class Episode(Base):
@@ -60,7 +60,7 @@ class Episode(Base):
 class EpisodePage(Base):
     __tablename__ = 'episode_pages'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     page_id = Column(String, nullable=False)  # Unique page identifier
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
@@ -90,7 +90,7 @@ class Lesson(Base):
 class LessonPage(Base):
     __tablename__ = 'lesson_pages'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     page_id = Column(String, nullable=False)  # Unique page identifier
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
@@ -103,8 +103,8 @@ class LessonPage(Base):
 class Tracking(Base):
     __tablename__ = 'tracking'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
     date = Column(Date, nullable=False)
     money_saved = Column(Float, default=0.0, nullable=False)
     lessons_completed = Column(Integer, default=0, nullable=False)
@@ -114,8 +114,8 @@ class Tracking(Base):
 class Settings(Base):
     __tablename__ = 'settings'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
+    user_id = Column(String, ForeignKey('users.id'), unique=True, nullable=False)
     notifications_enabled = Column(Boolean, default=True)
     dark_mode = Column(Boolean, default=False)
     # Add more preferences here
@@ -125,8 +125,8 @@ class Settings(Base):
 class UserLessonCompletion(Base):
     __tablename__ = 'user_lesson_completions'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
     lesson_id = Column(String, ForeignKey('lessons.id'), nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     progress_data = Column(JSON, nullable=True)  # Store quiz answers, choices made, etc.
@@ -137,8 +137,8 @@ class UserLessonCompletion(Base):
 class UserEpisodeCompletion(Base):
     __tablename__ = 'user_episode_completions'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
     episode_id = Column(String, ForeignKey('episodes.id'), nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     choices_made = Column(JSON, nullable=True)  # Store the path taken through the story
