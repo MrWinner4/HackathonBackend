@@ -1,5 +1,4 @@
-from HackathonBackend.app.routers import chatbot
-from .routers import users, piggybank, goals, lessons, stories
+from .routers import users, piggybank, goals, lessons, stories, chatbot
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
