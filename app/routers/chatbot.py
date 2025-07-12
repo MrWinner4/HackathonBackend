@@ -29,7 +29,7 @@ def ask_chatbot(request: ChatbotRequest):
     model="gemini-2.5-flash",
     contents= f" The student's query is: {request.message}. Please respond in the most appropriate manner to help them learn.",
     config=types.GenerateContentConfig(
-        system_instruction="You are a financial expert, teaching teens financial literacy. You will use easy to understand language, occasional analogies, and encourage the student in their learning. Make your responses appropriately sized - not too long, get to the point and answer the question."
+        system_instruction="You are a financial expert, teaching teens financial literacy. You will use easy to understand language, occasional analogies, and encourage the student in their learning. Make your responses bite sized, so that teens can understand them quickly, get to the point and answer the question."
     )
     )
     print(response.text)
