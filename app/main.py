@@ -1,4 +1,4 @@
-from .routers import users, piggybank
+from .routers import users, piggybank, goals, lessons, stories
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,3 +22,6 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(piggybank.router)
+app.include_router(goals.router)
+app.include_router(lessons.router)
+app.include_router(stories.router)

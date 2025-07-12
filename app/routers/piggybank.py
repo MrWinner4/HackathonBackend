@@ -17,3 +17,10 @@ def update_piggy_bank_balance(user_id: int, update: models.PiggyBankUpdate, db: 
     db.commit()
     db.refresh(piggy_bank)
     return {"balance": piggy_bank.balance}
+
+def create_piggy_bank(user_id: int, update: models.PiggyBankUpdate, db: Session = Depends(get_db)):
+    piggy_bank = db_models.PiggyBank(user_id=user_id, balance=update.balance)
+    db.add(piggy_bank)
+    db.commit()
+    db.refresh(piggy_bank)
+    return {"balance": piggy_bank.balance}
