@@ -3,6 +3,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
+import uuid
 
 Base = declarative_base()
 
@@ -44,7 +45,7 @@ class Goal(Base):
 class Episode(Base):
     __tablename__ = 'episodes'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     title = Column(String, nullable=False)
     subtitle = Column(String, nullable=False)
     emoji = Column(String, nullable=False)
@@ -66,14 +67,14 @@ class EpisodePage(Base):
     page_type = Column(String, default='content', nullable=False)
     choices = Column(JSON, nullable=True)  # Array of choice objects
     interactive_elements = Column(JSON, nullable=True)  # Array of interactive elements
-    episode_id = Column(Integer, ForeignKey('episodes.id'), nullable=False)
+    episode_id = Column(String, ForeignKey('episodes.id'), nullable=False)
 
     episode = relationship('Episode', back_populates='pages')
 
 class Lesson(Base):
     __tablename__ = 'lessons'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     title = Column(String, nullable=False)
     subtitle = Column(String, nullable=False)
     emoji = Column(String, nullable=False)
@@ -95,7 +96,7 @@ class LessonPage(Base):
     content = Column(Text, nullable=False)
     page_type = Column(String, default='content', nullable=False)
     interactive_elements = Column(JSON, nullable=True)  # Array of interactive elements
-    lesson_id = Column(Integer, ForeignKey('lessons.id'), nullable=False)
+    lesson_id = Column(String, ForeignKey('lessons.id'), nullable=False)
 
     lesson = relationship('Lesson', back_populates='pages')
 
@@ -126,7 +127,7 @@ class UserLessonCompletion(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    lesson_id = Column(Integer, ForeignKey('lessons.id'), nullable=False)
+    lesson_id = Column(String, ForeignKey('lessons.id'), nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     progress_data = Column(JSON, nullable=True)  # Store quiz answers, choices made, etc.
 
@@ -138,7 +139,7 @@ class UserEpisodeCompletion(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    episode_id = Column(Integer, ForeignKey('episodes.id'), nullable=False)
+    episode_id = Column(String, ForeignKey('episodes.id'), nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     choices_made = Column(JSON, nullable=True)  # Store the path taken through the story
 

@@ -1,9 +1,13 @@
+from dotenv import load_dotenv
 from .routers import users, piggybank, goals, lessons, stories, chatbot
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 import os
 import uvicorn
+
+load_dotenv()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))  # Render sets this
