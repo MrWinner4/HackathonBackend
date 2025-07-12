@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.venv/
+ENV/
+env/
+# If you're using pipenv
+Pipfile.lock
+
+# Editor-specific
+.vscode/
+.idea/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# Migrations (optional, if using Alembic and don't want to track auto-generated)
+alembic/versions/
+
+# Local SQLite DB (if applicable)
+*.sqlite3
+*.db
+
+# mypy / lint / typing cache
+.mypy_cache/
+.pyre/
+.pytype/
