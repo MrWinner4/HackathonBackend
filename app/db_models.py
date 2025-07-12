@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Date, Text
+    Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Date, Text, JSON
 )
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
@@ -18,7 +18,7 @@ class User(Base):
     settings = relationship('Settings', uselist=False, back_populates='user')
 
     lesson_completions = relationship('UserLessonCompletion', back_populates='user')
-    story_completions = relationship('UserStoryCompletion', back_populates='user')
+    episode_completions = relationship('UserEpisodeCompletion', back_populates='user')
 
 class PiggyBank(Base):
     __tablename__ = 'piggy_banks'
@@ -41,25 +41,63 @@ class Goal(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user = relationship('User', back_populates='goals')
 
+class Episode(Base):
+    __tablename__ = 'episodes'
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    subtitle = Column(String, nullable=False)
+    emoji = Column(String, nullable=False)
+    topics = Column(JSON, nullable=False)  # Array of topics
+    estimated_read_time = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_published = Column(Boolean, default=False, nullable=False)
+
+    pages = relationship('EpisodePage', back_populates='episode', cascade='all, delete-orphan')
+    completions = relationship('UserEpisodeCompletion', back_populates='episode')
+
+class EpisodePage(Base):
+    __tablename__ = 'episode_pages'
+
+    id = Column(Integer, primary_key=True, index=True)
+    page_id = Column(String, nullable=False)  # Unique page identifier
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    page_type = Column(String, default='content', nullable=False)
+    choices = Column(JSON, nullable=True)  # Array of choice objects
+    interactive_elements = Column(JSON, nullable=True)  # Array of interactive elements
+    episode_id = Column(Integer, ForeignKey('episodes.id'), nullable=False)
+
+    episode = relationship('Episode', back_populates='pages')
+
 class Lesson(Base):
     __tablename__ = 'lessons'
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    # Add more fields as needed
+    subtitle = Column(String, nullable=False)
+    emoji = Column(String, nullable=False)
+    learning_objectives = Column(JSON, nullable=False)  # Array of objectives
+    topics = Column(JSON, nullable=False)  # Array of topics
+    estimated_duration = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_published = Column(Boolean, default=False, nullable=False)
 
+    pages = relationship('LessonPage', back_populates='lesson', cascade='all, delete-orphan')
     completions = relationship('UserLessonCompletion', back_populates='lesson')
 
-class Story(Base):
-    __tablename__ = 'stories'
+class LessonPage(Base):
+    __tablename__ = 'lesson_pages'
 
     id = Column(Integer, primary_key=True, index=True)
+    page_id = Column(String, nullable=False)  # Unique page identifier
     title = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    # Add more fields for story content here
+    content = Column(Text, nullable=False)
+    page_type = Column(String, default='content', nullable=False)
+    interactive_elements = Column(JSON, nullable=True)  # Array of interactive elements
+    lesson_id = Column(Integer, ForeignKey('lessons.id'), nullable=False)
 
-    completions = relationship('UserStoryCompletion', back_populates='story')
+    lesson = relationship('Lesson', back_populates='pages')
 
 class Tracking(Base):
     __tablename__ = 'tracking'
@@ -90,17 +128,19 @@ class UserLessonCompletion(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     lesson_id = Column(Integer, ForeignKey('lessons.id'), nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    progress_data = Column(JSON, nullable=True)  # Store quiz answers, choices made, etc.
 
     user = relationship('User', back_populates='lesson_completions')
     lesson = relationship('Lesson', back_populates='completions')
 
-class UserStoryCompletion(Base):
-    __tablename__ = 'user_story_completions'
+class UserEpisodeCompletion(Base):
+    __tablename__ = 'user_episode_completions'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    story_id = Column(Integer, ForeignKey('stories.id'), nullable=False)
+    episode_id = Column(Integer, ForeignKey('episodes.id'), nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    choices_made = Column(JSON, nullable=True)  # Store the path taken through the story
 
-    user = relationship('User', back_populates='story_completions')
-    story = relationship('Story', back_populates='completions')
+    user = relationship('User', back_populates='episode_completions')
+    episode = relationship('Episode', back_populates='completions')
