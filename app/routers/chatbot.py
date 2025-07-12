@@ -1,6 +1,9 @@
+from dis import Instruction
+from google.genai.types import GenerateContentConfig
 from fastapi import APIRouter
 from pydantic import BaseModel
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 import os
 
@@ -10,6 +13,9 @@ api_key = os.getenv("GEMINI_API_KEY")
 router = APIRouter(prefix="/chatbot", tags=["Chatbot"])
 
 client = genai.Client(api_key=api_key)
+
+chat = client.chats.create(model="gemini-2.5-flash")
+
 
 class ChatbotRequest(BaseModel):
     message: str
@@ -21,7 +27,10 @@ class ChatbotResponse(BaseModel):
 def ask_chatbot(request: ChatbotRequest):
     response = client.models.generate_content(
     model="gemini-2.5-flash",
-    contents= f"You are a financial expert, teaching teens financial literacy. You will use easy to understand language, analogies, and encourage the student in their learning. Their query is: {request.message}. Please respond in the most appropriate manner to help them learn."
+    contents= f" The student's query is: {request.message}. Please respond in the most appropriate manner to help them learn.",
+    config=types.GenerateContentConfig(
+        system_instruction="You are a financial expert, teaching teens financial literacy. You will use easy to understand language, occasional analogies, and encourage the student in their learning. Make your responses appropriately sized - not too long, get to the point and answer the question."
+    )
     )
     print(response.text)
     if response.text:
