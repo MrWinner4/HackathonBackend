@@ -15,7 +15,7 @@ def get_goals(user=Depends(get_current_user)):
     return user.goals
 
 @router.post("/", response_model=models.GoalRequest)
-def add_goal(goal: models.Goal, user=Depends(get_current_user), db: Session = Depends(get_db)):
+def add_goal(goal: models.GoalRequest, user=Depends(get_current_user), db: Session = Depends(get_db)):
     db_goal = db_models.Goal(**goal.dict(), user_id=user.id)
     db.add(db_goal)
     db.commit()
@@ -23,7 +23,7 @@ def add_goal(goal: models.Goal, user=Depends(get_current_user), db: Session = De
     return db_goal
 
 @router.put("/{goal_id}", response_model=models.GoalRequest)
-def update_goal(goal_id: int, goal: models.Goal, user=Depends(get_current_user), db: Session = Depends(get_db)):
+def update_goal(goal_id: int, goal: models.GoalRequest, user=Depends(get_current_user), db: Session = Depends(get_db)):
     db_goal = db.query(db_models.Goal).filter_by(id=goal_id, user_id=user.id).first()
     if not db_goal:
         raise HTTPException(status_code=404, detail="Goal not found")
