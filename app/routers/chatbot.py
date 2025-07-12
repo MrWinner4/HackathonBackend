@@ -24,6 +24,7 @@ def ask_chatbot(request: ChatbotRequest):
     contents= f"You are a financial expert, teaching teens financial literacy. You will use easy to understand language, analogies, and encourage the student in their learning. Their query is: {request.message}. Please respond in the most appropriate manner to help them learn."
     )
     print(response.text)
-    if(response.text != ""):
-        return ChatbotResponse(response= "dummy testing")
-    
+    if response.text:
+        return ChatbotResponse(response=response.text)
+    else:
+        return ChatbotResponse(response="Looks like we had an error - whoops!")
