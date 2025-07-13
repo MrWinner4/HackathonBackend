@@ -55,7 +55,8 @@ async def generate_new_lesson(request: models.GenerateContentRequest, db: Sessio
             pages=[models.Page(**page) for page in lesson_data["pages"]],
             learning_objectives=lesson_data["learning_objectives"],
             topics=lesson_data["topics"],
-            estimated_duration=lesson_data["estimated_duration"]
+            estimated_duration=lesson_data["estimated_duration"],
+            created_at=db_lesson.created_at
         )
         
         return lesson

@@ -54,7 +54,8 @@ async def generate_new_story(request: models.GenerateContentRequest, db: Session
             emoji=story_data["emoji"],
             pages=[models.Page(**page) for page in story_data["pages"]],
             topics=story_data["topics"],
-            estimated_read_time=story_data["estimated_read_time"]
+            estimated_read_time=story_data["estimated_read_time"],
+            created_at=db_episode.created_at
         )
         
         return episode
