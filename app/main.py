@@ -10,15 +10,8 @@ import uvicorn
 
 load_dotenv()
 
-# Initialize Firebase Admin SDK
+# Initialize Firebase Admin SDK - Simplified
 try:
-    # Get Firebase project ID from environment
-    firebase_project_id = os.environ.get('FIREBASE_PROJECT_ID')
-    
-    if not firebase_project_id:
-        print("Warning: FIREBASE_PROJECT_ID not set. Firebase Admin SDK may not work properly.")
-    
-    # Check if we have Firebase credentials in environment
     firebase_credentials = os.environ.get('FIREBASE_CREDENTIALS')
     
     if firebase_credentials:
@@ -26,28 +19,19 @@ try:
         import json
         cred_dict = json.loads(firebase_credentials)
         cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred, {
-            'projectId': firebase_project_id
-        })
+        firebase_admin.initialize_app(cred)
+        print("✅ Firebase Admin SDK initialized successfully with service account")
     else:
-        # For production (Render), try to auto-detect credentials
-        # This requires setting GOOGLE_APPLICATION_CREDENTIALS or using default credentials
-        firebase_admin.initialize_app({
-            'projectId': firebase_project_id
-        })
+        print("⚠️  FIREBASE_CREDENTIALS not set. Firebase Admin SDK not initialized.")
         
 except ValueError:
-    # App already initialized
-    pass
+    print("ℹ️  Firebase Admin SDK already initialized")
 except Exception as e:
-    print(f"Firebase Admin initialization failed: {e}")
-    # Continue without Firebase Admin for now
-    pass
+    print(f"❌ Firebase Admin initialization failed: {e}")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))  # Render sets this
     uvicorn.run("app.main:app", host="0.0.0.0", port=port)
-
 
 app = FastAPI()
 
