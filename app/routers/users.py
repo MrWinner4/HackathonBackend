@@ -66,35 +66,9 @@ def register_user(request: Request, user: UserRequest, db: Session = Depends(get
         # 5. Create piggy bank
         piggy_bank = db_models.PiggyBank(
             user_id=user_obj.id,
-            balance=1000.0  # Start with some money
+            balance=00.00  # Start with some money
         )
         db.add(piggy_bank)
-        db.commit()
-        
-        # 6. Create some sample goals
-        sample_goals = [
-            db_models.Goal(
-                user_id=user_obj.id,
-                name="New Bike",
-                target_amount=500.0,
-                due_date=None
-            ),
-            db_models.Goal(
-                user_id=user_obj.id,
-                name="Vacation Fund",
-                target_amount=1200.0,
-                due_date=None
-            ),
-            db_models.Goal(
-                user_id=user_obj.id,
-                name="Laptop Upgrade",
-                target_amount=900.0,
-                due_date=None
-            ),
-        ]
-        
-        for goal in sample_goals:
-            db.add(goal)
         db.commit()
         
         # 7. Return clean, serialized user object
@@ -103,13 +77,7 @@ def register_user(request: Request, user: UserRequest, db: Session = Depends(get
             username=user_obj.username,
             email=user_obj.email,
             piggy_bank=models.PiggyBankResponse(balance=piggy_bank.balance),
-            goals=[models.GoalResponse(
-                id=goal.id,
-                name=goal.name,
-                target_amount=goal.target_amount,
-                due_date=goal.due_date,
-                created_at=goal.created_at
-            ) for goal in sample_goals],
+            goals=[],  # No goals - user will create their own
             settings=None,
         )
         
