@@ -13,6 +13,7 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
+    firebase_uid = Column(String, unique=True, nullable=True, index=True)  # Add this line
 
     piggy_bank = relationship('PiggyBank', uselist=False, back_populates='user')
     goals = relationship('Goal', back_populates='user')
