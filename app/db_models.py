@@ -54,6 +54,8 @@ class Episode(Base):
     estimated_read_time = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_published = Column(Boolean, default=False, nullable=False)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship('User')
 
     pages = relationship('EpisodePage', back_populates='episode', cascade='all, delete-orphan')
     completions = relationship('UserEpisodeCompletion', back_populates='episode')
@@ -84,6 +86,8 @@ class Lesson(Base):
     estimated_duration = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_published = Column(Boolean, default=False, nullable=False)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    user = relationship('User')
 
     pages = relationship('LessonPage', back_populates='lesson', cascade='all, delete-orphan')
     completions = relationship('UserLessonCompletion', back_populates='lesson')

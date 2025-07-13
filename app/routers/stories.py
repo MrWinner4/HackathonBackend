@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from .. import models
+from .. import models, db_models
 from ..content_generator import generate_story
 from ..db import get_db
 from ..db_models import Episode as EpisodeDB, EpisodePage as EpisodePageDB
@@ -9,8 +9,12 @@ import uuid
 
 router = APIRouter(prefix="/stories", tags=["Stories"])
 
+def get_current_user(db: Session = Depends(get_db)):
+    # TODO: Replace with Firebase token verification
+    return db.query(db_models.User).first()
+
 @router.post("/generate", response_model=models.EpisodeResponse)
-async def generate_new_story(request: models.GenerateContentRequest, db: Session = Depends(get_db)):
+async def generate_new_story(request: models.GenerateContentRequest, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     """Generate a new interactive story and save it to the database"""
     try:
         story_data = generate_story(request.topic)
@@ -26,7 +30,8 @@ async def generate_new_story(request: models.GenerateContentRequest, db: Session
             emoji=story_data["emoji"],
             topics=story_data["topics"],
             estimated_read_time=story_data["estimated_read_time"],
-            is_published=True
+            is_published=True,
+            user_id=current_user.id,
         )
         db.add(db_episode)
         
