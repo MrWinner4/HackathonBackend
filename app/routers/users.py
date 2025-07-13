@@ -21,13 +21,21 @@ def get_current_user(db: Session = Depends(get_db)):
 def get_me(user=Depends(get_current_user)):
     # Serialize user and related data
     return models.UserResponse(
+        id=user.id,
         username=user.username,
         email=user.email,
-        piggybank_balance=user.piggybank.balance,
-        goals=user.goals,
-        settings=user.settings,
-        lesson_completions=user.lesson_completions,
-        story_completions=user.story_completions,
+        piggy_bank=models.PiggyBankResponse(balance=user.piggy_bank.balance if user.piggy_bank else 0.0),
+        goals=[models.GoalResponse(
+            id=goal.id,
+            name=goal.name,
+            target_amount=goal.target_amount,
+            due_date=goal.due_date,
+            created_at=goal.created_at
+        ) for goal in user.goals],
+        settings=models.SettingsResponse(
+            notifications_enabled=user.settings.notifications_enabled if user.settings else True,
+            dark_mode=user.settings.dark_mode if user.settings else False
+        ) if user.settings else None,
     )
 
 

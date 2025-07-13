@@ -10,7 +10,7 @@ class UserRequest(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: int
+    id: str
     username: str
     email: str
     piggy_bank: "PiggyBankResponse"
@@ -33,7 +33,10 @@ class GoalRequest(BaseModel):
 
 
 class GoalResponse(BaseModel):
-    id: int
+    id: str
+    name: str
+    target_amount: float
+    due_date: Optional[date] = None
     created_at: datetime
 
 
