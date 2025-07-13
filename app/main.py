@@ -12,6 +12,12 @@ load_dotenv()
 
 # Initialize Firebase Admin SDK
 try:
+    # Get Firebase project ID from environment
+    firebase_project_id = os.environ.get('FIREBASE_PROJECT_ID')
+    
+    if not firebase_project_id:
+        print("Warning: FIREBASE_PROJECT_ID not set. Firebase Admin SDK may not work properly.")
+    
     # Check if we have Firebase credentials in environment
     firebase_credentials = os.environ.get('FIREBASE_CREDENTIALS')
     
@@ -20,11 +26,15 @@ try:
         import json
         cred_dict = json.loads(firebase_credentials)
         cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
+        firebase_admin.initialize_app(cred, {
+            'projectId': firebase_project_id
+        })
     else:
         # For production (Render), try to auto-detect credentials
         # This requires setting GOOGLE_APPLICATION_CREDENTIALS or using default credentials
-        firebase_admin.initialize_app()
+        firebase_admin.initialize_app({
+            'projectId': firebase_project_id
+        })
         
 except ValueError:
     # App already initialized
