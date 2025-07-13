@@ -10,7 +10,7 @@ class UserRequest(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: str
+    id: str  # UUID as string
     username: str
     email: str
     piggy_bank: "PiggyBankResponse"
@@ -130,12 +130,12 @@ class SettingsResponse(BaseModel):
 
 
 class UserLessonCompletion(BaseModel):
-    user_id: int
-    lesson_id: int
+    user_id: str
+    lesson_id: str
     completed_at: datetime
 
 
 class UserStoryCompletion(BaseModel):
-    user_id: int
-    story_id: int
+    user_id: str
+    story_id: str
     completed_at: datetime

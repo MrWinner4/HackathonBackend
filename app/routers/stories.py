@@ -69,9 +69,12 @@ async def generate_new_story(request: models.GenerateContentRequest, current_use
         raise HTTPException(status_code=500, detail=f"Error generating story: {str(e)}")
 
 @router.get("/", response_model=List[models.EpisodeResponse])
-def get_episodes(db: Session = Depends(get_db)):
-    """Get all published episodes"""
-    db_episodes = db.query(EpisodeDB).filter(EpisodeDB.is_published == True).all()
+def get_episodes(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get all published episodes for the current user"""
+    db_episodes = db.query(EpisodeDB).filter(
+        EpisodeDB.is_published == True,
+        EpisodeDB.user_id == current_user.id
+    ).all()
     
     episodes = []
     for db_episode in db_episodes:
@@ -107,9 +110,12 @@ def get_episodes(db: Session = Depends(get_db)):
     return episodes
 
 @router.get("/{episode_id}", response_model=models.EpisodeResponse)
-def get_episode(episode_id: str, db: Session = Depends(get_db)):
-    """Get a specific episode by ID"""
-    db_episode = db.query(EpisodeDB).filter(EpisodeDB.id == episode_id).first()
+def get_episode(episode_id: str, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get a specific episode by ID for the current user"""
+    db_episode = db.query(EpisodeDB).filter(
+        EpisodeDB.id == episode_id,
+        EpisodeDB.user_id == current_user.id
+    ).first()
     if not db_episode:
         raise HTTPException(status_code=404, detail="Episode not found")
     

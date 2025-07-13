@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from .. import models
+from .. import models, db_models
 from ..content_generator import generate_lesson
 from ..db import get_db
 from ..db_models import Lesson as LessonDB, LessonPage as LessonPageDB
@@ -9,8 +9,12 @@ import uuid
 
 router = APIRouter(prefix="/lessons", tags=["Lessons"])
 
+def get_current_user(db: Session = Depends(get_db)):
+    # TODO: Replace with Firebase token verification
+    return db.query(db_models.User).first()
+
 @router.post("/generate", response_model=models.LessonResponse)
-async def generate_new_lesson(request: models.GenerateContentRequest, db: Session = Depends(get_db)):
+async def generate_new_lesson(request: models.GenerateContentRequest, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     """Generate a new educational lesson and save it to the database"""
     try:
         lesson_data = generate_lesson(request.topic)
@@ -27,7 +31,8 @@ async def generate_new_lesson(request: models.GenerateContentRequest, db: Sessio
             learning_objectives=lesson_data["learning_objectives"],
             topics=lesson_data["topics"],
             estimated_duration=lesson_data["estimated_duration"],
-            is_published=True
+            is_published=True,
+            user_id=current_user.id,
         )
         db.add(db_lesson)
         
@@ -65,9 +70,12 @@ async def generate_new_lesson(request: models.GenerateContentRequest, db: Sessio
         raise HTTPException(status_code=500, detail=f"Error generating lesson: {str(e)}")
 
 @router.get("/", response_model=List[models.LessonResponse])
-def get_lessons(db: Session = Depends(get_db)):
-    """Get all published lessons"""
-    db_lessons = db.query(LessonDB).filter(LessonDB.is_published == True).all()
+def get_lessons(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get all published lessons for the current user"""
+    db_lessons = db.query(LessonDB).filter(
+        LessonDB.is_published == True,
+        LessonDB.user_id == current_user.id
+    ).all()
     
     lessons = []
     for db_lesson in db_lessons:
@@ -103,9 +111,12 @@ def get_lessons(db: Session = Depends(get_db)):
     return lessons
 
 @router.get("/{lesson_id}", response_model=models.LessonResponse)
-def get_lesson(lesson_id: str, db: Session = Depends(get_db)):
-    """Get a specific lesson by ID"""
-    db_lesson = db.query(LessonDB).filter(LessonDB.id == lesson_id).first()
+def get_lesson(lesson_id: str, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get a specific lesson by ID for the current user"""
+    db_lesson = db.query(LessonDB).filter(
+        LessonDB.id == lesson_id,
+        LessonDB.user_id == current_user.id
+    ).first()
     if not db_lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
     
