@@ -44,25 +44,75 @@ def register_user(request: Request, user: UserRequest, db: Session = Depends(get
     # 1. Get the Firebase ID token from the Authorization header
     id_token = request.headers.get('Authorization')
     if not id_token:
-        raise HTTPException(status_code=401, detail='Missing ID token')
+        raise HTTPException(status_code=401, detail='Missing Firebase ID token')
+    
     try:
         # 2. Verify the token with Firebase Admin SDK
         decoded_token = firebase_auth.verify_id_token(id_token)
         uid = decoded_token['uid']
-        email = decoded_token.get('email')
-    except Exception:
-        raise HTTPException(status_code=401, detail='Invalid ID token')
-    # 3. Check if user exists
-    user_obj = db.query(db_models.User).filter_by(firebase_uid=uid).first()
-    if user_obj:
-        raise HTTPException(status_code=409, detail='User already exists')
-    # 4. Create user
-    user_obj = db_models.User(firebase_uid=uid, username=user.username, email=email)
-    db.add(user_obj)
-    db.commit()
-    db.refresh(user_obj)
-    # 5. Create piggy bank
-    piggybank_update = models.PiggyBankUpdate(balance=0.0)
-    create_piggy_bank(user_id=user_obj.id, update=piggybank_update, db=db)
-    # 6. Return clean, serialized user object
-    return UserResponse.from_orm(user_obj)
+        email = decoded_token.get('email') or user.email
+        
+        # 3. Check if user already exists
+        existing_user = db.query(db_models.User).filter_by(firebase_uid=uid).first()
+        if existing_user:
+            raise HTTPException(status_code=409, detail='User already exists')
+        
+        # 4. Create user with Firebase UID
+        user_obj = db_models.User(firebase_uid=uid, username=user.username, email=email)
+        db.add(user_obj)
+        db.commit()
+        db.refresh(user_obj)
+        
+        # 5. Create piggy bank
+        piggy_bank = db_models.PiggyBank(
+            user_id=user_obj.id,
+            balance=1000.0  # Start with some money
+        )
+        db.add(piggy_bank)
+        db.commit()
+        
+        # 6. Create some sample goals
+        sample_goals = [
+            db_models.Goal(
+                user_id=user_obj.id,
+                name="New Bike",
+                target_amount=500.0,
+                due_date=None
+            ),
+            db_models.Goal(
+                user_id=user_obj.id,
+                name="Vacation Fund",
+                target_amount=1200.0,
+                due_date=None
+            ),
+            db_models.Goal(
+                user_id=user_obj.id,
+                name="Laptop Upgrade",
+                target_amount=900.0,
+                due_date=None
+            ),
+        ]
+        
+        for goal in sample_goals:
+            db.add(goal)
+        db.commit()
+        
+        # 7. Return clean, serialized user object
+        return models.UserResponse(
+            id=user_obj.id,
+            username=user_obj.username,
+            email=user_obj.email,
+            piggy_bank=models.PiggyBankResponse(balance=piggy_bank.balance),
+            goals=[models.GoalResponse(
+                id=goal.id,
+                name=goal.name,
+                target_amount=goal.target_amount,
+                due_date=goal.due_date,
+                created_at=goal.created_at
+            ) for goal in sample_goals],
+            settings=None,
+        )
+        
+    except Exception as e:
+        print(f"Firebase token verification failed: {e}")
+        raise HTTPException(status_code=401, detail=f'Invalid Firebase ID token: {str(e)}')
